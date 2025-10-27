@@ -1,0 +1,5 @@
+{{block "mouse" .}}
+<button hx-post="/mouse_entered" hx-trigger="mouseenter" hx-swap="outerHTML">
+  test
+</button>
+{{ end }} {{ block "replace" .}} Replacing {{end}}

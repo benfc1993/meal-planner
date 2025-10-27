@@ -1,0 +1,8 @@
+<html>
+  {{ template "pages/header.html" "Meal planner - all" }}
+  <body>
+    {{ template "navigation" "all"}}
+    <h1>All recipes</h1>
+    <div hx-get="/recipes/all" hx-swap="innerHTML" hx-trigger="load"></div>
+  </body>
+</html>
