@@ -1,0 +1,15 @@
+[Unit]
+Description=Meal planner http site
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=60
+StartLimitBurst=5
+StartLimitIntervalSec=300
+WorkingDirectory=/usr/local/bin/meal-planner
+ExecStart=/usr/local/bin/meal-planner/meals --name=meal-planer
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
