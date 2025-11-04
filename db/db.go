@@ -55,7 +55,6 @@ func createTables(db *sql.DB) (sql.Result, error) {
 		page INTEGER DEFAULT 0,
 		UNIQUE(name, book)
 	);
-	DROP TABLE week_recipes;
 	CREATE TABLE IF NOT EXISTS week_recipes (
 		date DATE not null,
 		recipe_id INTEGER NOT NULL REFERENCES recipes(id)
