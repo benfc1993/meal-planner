@@ -38,7 +38,14 @@ func HandleRecipesGenerate(c echo.Context) error {
 	count, _ := strconv.Atoi(c.Request().Form.Get("count"))
 
 	data := &HomepageData{}
-	allRecipes, err := db.GetAllRecipes()
+	recentRecipes, err := db.GetRecentRecipes()
+	var recentIds = []string{}
+
+	for i := range len(recentRecipes) {
+		recentIds = append(recentIds, strconv.Itoa(recentRecipes[i].Id))
+	}
+
+	allRecipes, err := db.GetRecipesExcept(recentIds)
 
 	if err != nil || count > len(allRecipes) {
 		return c.Render(200, "pages/home/index.html", data)

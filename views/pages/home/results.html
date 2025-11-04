@@ -12,7 +12,7 @@
 {{block "result".}}
 <div style="display: flex; gap: 6px" id="gen-result-{{.Id}}">
   <input name="recipe" value="{{.Id}}" readonly hidden />
-  <p>{{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
+  <p>{{.Id}} || {{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
   <button type="button">Re-roll</button>
   <button
     type="button"

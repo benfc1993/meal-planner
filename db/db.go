@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/glebarez/go-sqlite"
 )
@@ -94,6 +95,73 @@ func GetAllRecipes() ([]Recipe, error) {
 	defer db.Close()
 
 	rows, err := db.Query(`SELECT * FROM recipes;`)
+
+	var recipes []Recipe
+	for rows.Next() {
+		r := &Recipe{}
+		rows.Scan(&r.Id, &r.Name, &r.Book, &r.Page)
+		recipes = append(recipes, *r)
+	}
+
+	return recipes, nil
+
+}
+
+func GetRecentRecipes() ([]Recipe, error) {
+	db, err := ConnectToDB()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+
+	date := time.Now().AddDate(0, -1, 0).Format("2006-01-02")
+
+	rows, err := db.Query(`SELECT recipes.id, recipes.name, recipes.book, recipes.page 
+	FROM recipes 
+	INNER JOIN week_recipes 
+	ON recipes.id=week_recipes.recipe_id AND date>?;`, date)
+
+	if err != nil {
+		log.Println("Oops")
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var recipes []Recipe
+
+	for rows.Next() {
+		println("recipe")
+		r := &Recipe{}
+		rows.Scan(&r.Id, &r.Name, &r.Book, &r.Page)
+		recipes = append(recipes, *r)
+	}
+
+	return recipes, nil
+}
+
+func GetRecipesExcept(exclude []string) ([]Recipe, error) {
+	db, err := ConnectToDB()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	query := `SELECT * FROM recipes WHERE id NOT IN(`
+	for i := range len(exclude) {
+		query += exclude[i] + ","
+	}
+
+	if len(exclude) > 0 {
+		query = query[:len(query)-1]
+	}
+
+	query += ");"
+
+	rows, err := db.Query(query)
 
 	var recipes []Recipe
 	for rows.Next() {
