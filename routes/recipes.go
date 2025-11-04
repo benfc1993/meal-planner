@@ -2,12 +2,11 @@ package routes
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"log"
 	"meal-choices/db"
 	"strconv"
 	"strings"
-
-	"github.com/labstack/echo/v4"
 )
 
 func HandleRecipeAdd(c echo.Context) error {
@@ -46,13 +45,11 @@ func HandleRecipeAdd(c echo.Context) error {
 }
 
 func HandleGetAllRecipes(c echo.Context) error {
-	count, err := db.GetAllRecipes()
+	recipes, err := db.GetAllRecipes()
 	if err != nil {
 		log.Fatal(err)
 		return c.Render(500, "recipes-list", nil)
 	}
 
-	println(count[0].Name)
-
-	return c.Render(200, "recipes-list", count)
+	return c.Render(200, "recipes-list", recipes)
 }

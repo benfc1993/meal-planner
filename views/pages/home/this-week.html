@@ -1,0 +1,17 @@
+{{ block "this-week" . }}
+<div id="this-week">
+  {{ if .Recipes }}
+  <h1>This week</h1>
+  <div>
+    {{range .Recipes }}
+    <p>{{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
+    {{ end}}
+  </div>
+  {{ else }}
+  <form hx-swap="outerHTML" hx-target="#this-week" hx-post="/recipes/generate">
+    <input name="count" value="5" />
+    <button>Generate</button>
+  </form>
+  {{ end }}
+</div>
+{{ end }}

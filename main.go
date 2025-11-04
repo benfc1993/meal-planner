@@ -104,16 +104,16 @@ func main() {
 
 	e.Renderer = newTemplate()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "pages/home/index.html", nil)
-	})
+	e.GET("/", routes.HandleHomepage)
 
 	e.GET("/all", func(c echo.Context) error {
 		log.Println("testing")
 		return c.Render(200, "pages/all/index.html", nil)
 	})
+	e.POST("/recipes/generate", routes.HandleRecipesGenerate)
 	e.POST("/recipes/add", routes.HandleRecipeAdd)
 	e.GET("/recipes/all", routes.HandleGetAllRecipes)
+	e.DELETE("/", func(c echo.Context) error { return nil })
 
 	ip := fmt.Sprintf("%s:80", GetOutboundIP().String())
 	log.Println(os.Getenv("ENV"))

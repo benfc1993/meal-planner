@@ -1,7 +1,7 @@
 {{ block "recipes-list" . }}
 <div>
   {{range . }}
-  <p>{{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
+  <p>{{.Id}} - {{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
   {{ end}}
 </div>
 {{ end }}

@@ -1,0 +1,79 @@
+package routes
+
+import (
+	"errors"
+	"math/rand/v2"
+	"meal-choices/db"
+	"strconv"
+	"time"
+
+	"github.com/labstack/echo/v4"
+)
+
+type HomepageData struct {
+	Recipes []db.Recipe
+}
+
+func HandleHomepage(c echo.Context) error {
+
+	weekDate, err := getStartOfWeekDate()
+
+	if err != nil {
+		return nil
+	}
+
+	data := &HomepageData{}
+
+	recipes, err := db.GetRecipesForWeek(weekDate)
+
+	if err == nil {
+		data.Recipes = recipes
+	}
+
+	return c.Render(200, "pages/home/index.html", data)
+}
+
+func HandleRecipesGenerate(c echo.Context) error {
+	c.Request().ParseForm()
+	count, _ := strconv.Atoi(c.Request().Form.Get("count"))
+
+	data := &HomepageData{}
+	allRecipes, err := db.GetAllRecipes()
+
+	if err != nil || count > len(allRecipes) {
+		return c.Render(200, "pages/home/index.html", data)
+	}
+
+	for i := len(allRecipes) - 1; i > 0; i-- {
+		j := rand.IntN(i + 1)
+		allRecipes[i], allRecipes[j] = allRecipes[j], allRecipes[i]
+	}
+
+	recipes := allRecipes[:count]
+
+	data.Recipes = recipes
+
+	return c.Render(200, "results", data)
+
+}
+
+var days = [7]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
+
+func getStartOfWeekDate() (string, error) {
+	today := time.Now().Format("Mon")
+
+	index := -1
+	for i := range len(days) {
+		if days[i] == today {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return "", errors.New("Invalid date")
+	}
+
+	return time.Now().AddDate(0, 0, -index).Format("2006-01-02"), nil
+
+}
