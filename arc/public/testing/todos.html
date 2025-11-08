@@ -1,0 +1,5 @@
+{{ block "todos" . }} {{range .Todos}} {{if .Done}}
+<li class="done">{{.Title}}</li>
+{{else}}
+<li>{{.Title}}</li>
+{{end}} {{end}} {{end}}

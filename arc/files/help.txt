@@ -1,0 +1,7 @@
+Http server in go:
+Options
+	-p | --port <value>		Port (string)
+	-u | --host <value>		Host (string)
+	-s | --https 			Use https (boolean flag)
+	-other					Testing file reading
+
