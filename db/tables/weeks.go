@@ -22,6 +22,7 @@ func GetRecentRecipes() ([]schema.Recipe, error) {
 
 	if err != nil {
 		log.Println("Oops")
+		log.Print(err)
 		return nil, err
 	}
 
