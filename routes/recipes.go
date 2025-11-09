@@ -2,21 +2,21 @@ package routes
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"meal-choices/db/schema"
 	"meal-choices/db/tables"
+	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/labstack/echo/v4"
 )
 
-func HandleRecipeAdd(c echo.Context) error {
+func HandleRecipeAdd(w http.ResponseWriter, r *http.Request, templates *template.Template) error {
 
-	c.Request().ParseForm()
-	name := c.Request().Form.Get("name")
-	book := c.Request().Form.Get("book")
-	pageNum, _ := strconv.Atoi(c.Request().Form.Get("page"))
+	r.ParseForm()
+	name := r.Form.Get("name")
+	book := r.Form.Get("book")
+	pageNum, _ := strconv.Atoi(r.Form.Get("page"))
 
 	if name == "" || book == "" {
 		var missingValue []string
@@ -27,8 +27,9 @@ func HandleRecipeAdd(c echo.Context) error {
 			missingValue = append(missingValue, "name")
 		}
 
-		c.Render(422, "recipe-error", fmt.Sprintf("Problem creating recipe, missing: %v", strings.Join(missingValue, ", ")))
-		return c.Render(422, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
+		w.WriteHeader(422)
+		templates.ExecuteTemplate(w, "recipe-error", fmt.Sprintf("Problem creating recipe, missing: %v", strings.Join(missingValue, ", ")))
+		return templates.ExecuteTemplate(w, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
 	}
 
 	_, err := tables.AddRecipe(name, book, pageNum)
@@ -38,20 +39,23 @@ func HandleRecipeAdd(c echo.Context) error {
 			message = fmt.Sprintf("Recipe: \"%v\" in Book: \"%v\" already exists.", name, book)
 		}
 
-		c.Render(422, "recipe-error", message)
-		return c.Render(422, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
+		w.WriteHeader(422)
+		templates.ExecuteTemplate(w, "recipe-error", message)
+		return templates.ExecuteTemplate(w, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
 	}
 
-	c.Render(200, "recipe-result", fmt.Sprintf("Recipe \"%v\" added.", name))
-	return c.Render(422, "recipe-form", &schema.Recipe{})
+	w.WriteHeader(201)
+	templates.ExecuteTemplate(w, "recipe-result", fmt.Sprintf("Recipe \"%v\" added.", name))
+	return templates.ExecuteTemplate(w, "recipe-form", &schema.Recipe{})
 }
 
-func HandleGetAllRecipes(c echo.Context) error {
+func HandleGetAllRecipes(w http.ResponseWriter, r *http.Request, templates *template.Template) error {
 	recipes, err := tables.GetAllRecipes()
 	if err != nil {
 		log.Fatal(err)
-		return c.Render(500, "recipes-list", nil)
+		w.WriteHeader(500)
+		return templates.ExecuteTemplate(w, "recipes-list", nil)
 	}
 
-	return c.Render(200, "recipes-list", recipes)
+	return templates.ExecuteTemplate(w, "recipes-list", recipes)
 }

@@ -3,21 +3,20 @@ package routes
 import (
 	"errors"
 	"html/template"
+	"log"
 	"math/rand/v2"
 	"meal-choices/db/schema"
 	"meal-choices/db/tables"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/labstack/echo/v4"
 )
 
 type HomepageData struct {
 	Recipes []schema.Recipe
 }
 
-func HandleHomepage(w http.ResponseWriter, templates *template.Template) error {
+func HandleHomepage(w http.ResponseWriter, r *http.Request, templates *template.Template) error {
 
 	weekDate, err := getStartOfWeekDate()
 
@@ -36,9 +35,11 @@ func HandleHomepage(w http.ResponseWriter, templates *template.Template) error {
 	return templates.ExecuteTemplate(w, "/", data)
 }
 
-func HandleRecipesGenerate(c echo.Context) error {
-	c.Request().ParseForm()
-	count, _ := strconv.Atoi(c.Request().Form.Get("count"))
+func HandleRecipesGenerate(w http.ResponseWriter, r *http.Request, templates *template.Template) error {
+	log.Println("Generate")
+	r.ParseForm()
+	count, _ := strconv.Atoi(r.Form.Get("count"))
+	log.Println(count)
 
 	data := &HomepageData{}
 	recentRecipes, err := tables.GetRecentRecipes()
@@ -51,7 +52,7 @@ func HandleRecipesGenerate(c echo.Context) error {
 	allRecipes, err := tables.GetRecipesExcept(recentIds)
 
 	if err != nil || count > len(allRecipes) {
-		return c.Render(200, "pages/home/index.html", data)
+		return templates.ExecuteTemplate(w, "/", data)
 	}
 
 	for i := len(allRecipes) - 1; i > 0; i-- {
@@ -63,7 +64,7 @@ func HandleRecipesGenerate(c echo.Context) error {
 
 	data.Recipes = recipes
 
-	return c.Render(200, "results", data)
+	return templates.ExecuteTemplate(w, "results", data)
 
 }
 
