@@ -8,7 +8,7 @@ RestartSec=60
 StartLimitBurst=5
 StartLimitIntervalSec=300
 WorkingDirectory=/usr/local/bin/meal-planner
-ExecStart=/usr/local/bin/meal-planner/meals --name=meal-planer
+ExecStart=/usr/local/bin/meal-planner --name=meal-planer
 Type=simple
 
 [Install]

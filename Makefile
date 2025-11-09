@@ -1,4 +1,4 @@
-BINARY_NAME=meals
+BINARY_NAME=meal-planner
 
 build:
 	go mod tidy

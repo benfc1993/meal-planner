@@ -72,6 +72,9 @@ type Options struct {
 
 func getOpts() *Options {
 	options := &Options{Port: "5000", Host: "localhost", Https: false}
+	if os.Getenv("ENV") != "dev" {
+		options.Host = GetOutboundIP().String()
+	}
 
 	for i := 0; i < len(os.Args); i++ {
 		arg := os.Args[i]
