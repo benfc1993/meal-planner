@@ -14,7 +14,7 @@ func NewRecipe() *Recipe {
 		Id:   -1,
 		Name: "",
 		Book: "",
-		Page: -1,
+		Page: 0,
 	}
 }
 

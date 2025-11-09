@@ -13,35 +13,22 @@
     <input
       id="recipe-name"
       name="name"
-      {{if
-      .Name
-      }}value="{{ .Name }}"
-      {{
-      end
-      }}
+      {{if .Name }}value="{{ .Name }}" {{ end }}
     />
 
     <label for="recipe-book">Book</label>
     <input
       id="recipe-book"
       name="book"
-      {{if
-      .Book
-      }}value="{{ .Book }}"
-      {{
-      end
-      }}
+      {{if .Book }}value="{{ .Book }}" {{ end }}
     />
 
     <label for="recipe-page">Page No.</label>
     <input
       id="recipe-page"
       name="page"
-      {{if
-      .Page}}value="{{ .Page }}"
-      {{
-      end
-      }}
+	  min="0"
+      {{if .Page}}value="{{ .Page }}"{{ end }}
       type="number"
     />
   </div>

@@ -1,7 +1,7 @@
 <html>
   {{ template "header" "Meal planner"}}
   <body>
-    {{ template "navigation" "home" }} {{ template "recipe-form-view" .Form }}
+    {{ template "navigation" "add" }} {{ template "recipe-form-view" .}}
     <script>
       htmx.on("htmx:beforeSwap", (e) => {
         // Allow 422 and 400 responses to swap

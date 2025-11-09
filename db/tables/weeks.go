@@ -13,7 +13,7 @@ func GetRecentRecipes() ([]schema.Recipe, error) {
 
 	defer db.Close()
 
-	date := time.Now().AddDate(0, -1, 0).Format("2006-01-02")
+	date := time.Now().AddDate(0, -1, 0).Format(time.DateOnly)
 
 	rows, err := db.Query(`SELECT recipes.id, recipes.name, recipes.book, recipes.page 
 	FROM recipes 
@@ -31,7 +31,6 @@ func GetRecentRecipes() ([]schema.Recipe, error) {
 	var recipes []schema.Recipe
 
 	for rows.Next() {
-		println("recipe")
 		r := &schema.Recipe{}
 		rows.Scan(&r.Id, &r.Name, &r.Book, &r.Page)
 		recipes = append(recipes, *r)
@@ -60,7 +59,6 @@ func GetRecipesForWeek(date string) ([]schema.Recipe, error) {
 	var recipes []schema.Recipe
 
 	for rows.Next() {
-		println("recipe")
 		r := &schema.Recipe{}
 		rows.Scan(&r.Id, &r.Name, &r.Book, &r.Page)
 		recipes = append(recipes, *r)

@@ -1,6 +1,7 @@
 {{ block "results" . }}
 <div>
   <form hx-post="/recipes/week">
+	<input name="week" value="{{.Week}}" hidden readonly/>
     {{range .Recipes }} {{template "result" .}} {{ end}}
     <button>Save</button>
   </form>

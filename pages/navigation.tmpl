@@ -1,8 +1,7 @@
 {{ block "navigation" . }}
-<div style="display: flex; flex-gap: 12px">
-  {{ if ne . "home" }}<a href="/">Home</a>{{ end }} {{ if ne . "all"}}<a
-    href="/all"
-    >Recipes</a
-  >{{ end }}
+<div style="display: flex; gap: 12px">
+  {{ if ne . "home" }}<a href="/">Home</a>{{ end }}
+  {{ if ne . "all"}}<a href="/all">Recipes</a>{{ end }}
+  {{ if ne . "add"}}<a href="/add">Add</a>{{ end }}
 </div>
 {{ end }}
