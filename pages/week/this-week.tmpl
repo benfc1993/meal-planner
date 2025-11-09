@@ -1,11 +1,9 @@
 {{ block "this-week" . }}
-  <form hx-post="/week/goto" hx-target="body">
-	<input type="date" name="week" value="{{ .Week }}"/>
-	<button>go</button>
-  </form>
+	<input id="week" type="date" name="week" value="{{ .Week }}" hx-on:change="document.getElementById('week-link').href = `/week/${this.value}`"/>
+	<a id="week-link" href="/week/{{.Week}}">go</a>
 <div id="this-week">
+  <h1>Week - {{ .Week }}</h1>
   {{ if .Recipes }}
-  <h1>This week - {{ .Week }}</h1>
   <div>
     {{range .Recipes }}
     <p>{{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
