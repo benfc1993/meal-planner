@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"meal-choices/db/schema"
 	"os"
 
 	_ "modernc.org/sqlite"
@@ -21,6 +22,7 @@ func ConnectToDB() *sql.DB {
 	}
 
 	db, err := sql.Open("sqlite", path)
+
 	if err != nil {
 		log.Fatal("Could not connect to DB")
 	}
@@ -34,6 +36,6 @@ func Init() {
 	db := ConnectToDB()
 	defer db.Close()
 
-	CreateUserTable(db)
-	CreatePostsTable(db)
+	schema.CreateRecipeTable(db)
+	schema.CreateWeeksTable(db)
 }

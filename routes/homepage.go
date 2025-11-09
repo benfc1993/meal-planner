@@ -2,8 +2,11 @@ package routes
 
 import (
 	"errors"
+	"html/template"
 	"math/rand/v2"
-	"meal-choices/db"
+	"meal-choices/db/schema"
+	"meal-choices/db/tables"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -11,10 +14,10 @@ import (
 )
 
 type HomepageData struct {
-	Recipes []db.Recipe
+	Recipes []schema.Recipe
 }
 
-func HandleHomepage(c echo.Context) error {
+func HandleHomepage(w http.ResponseWriter, templates *template.Template) error {
 
 	weekDate, err := getStartOfWeekDate()
 
@@ -24,13 +27,13 @@ func HandleHomepage(c echo.Context) error {
 
 	data := &HomepageData{}
 
-	recipes, err := db.GetRecipesForWeek(weekDate)
+	recipes, err := tables.GetRecipesForWeek(weekDate)
 
 	if err == nil {
 		data.Recipes = recipes
 	}
 
-	return c.Render(200, "pages/home/index.html", data)
+	return templates.ExecuteTemplate(w, "/", data)
 }
 
 func HandleRecipesGenerate(c echo.Context) error {
@@ -38,14 +41,14 @@ func HandleRecipesGenerate(c echo.Context) error {
 	count, _ := strconv.Atoi(c.Request().Form.Get("count"))
 
 	data := &HomepageData{}
-	recentRecipes, err := db.GetRecentRecipes()
+	recentRecipes, err := tables.GetRecentRecipes()
 	var recentIds = []string{}
 
 	for i := range len(recentRecipes) {
 		recentIds = append(recentIds, strconv.Itoa(recentRecipes[i].Id))
 	}
 
-	allRecipes, err := db.GetRecipesExcept(recentIds)
+	allRecipes, err := tables.GetRecipesExcept(recentIds)
 
 	if err != nil || count > len(allRecipes) {
 		return c.Render(200, "pages/home/index.html", data)

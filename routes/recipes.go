@@ -2,11 +2,13 @@ package routes
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"log"
-	"meal-choices/db"
+	"meal-choices/db/schema"
+	"meal-choices/db/tables"
 	"strconv"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 func HandleRecipeAdd(c echo.Context) error {
@@ -26,10 +28,10 @@ func HandleRecipeAdd(c echo.Context) error {
 		}
 
 		c.Render(422, "recipe-error", fmt.Sprintf("Problem creating recipe, missing: %v", strings.Join(missingValue, ", ")))
-		return c.Render(422, "recipe-form", &db.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
+		return c.Render(422, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
 	}
 
-	_, err := db.AddRecipe(name, book, pageNum)
+	_, err := tables.AddRecipe(name, book, pageNum)
 	if err != nil {
 		message := "Problem creating recipe"
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
@@ -37,15 +39,15 @@ func HandleRecipeAdd(c echo.Context) error {
 		}
 
 		c.Render(422, "recipe-error", message)
-		return c.Render(422, "recipe-form", &db.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
+		return c.Render(422, "recipe-form", &schema.Recipe{Id: -1, Name: name, Book: book, Page: pageNum})
 	}
 
 	c.Render(200, "recipe-result", fmt.Sprintf("Recipe \"%v\" added.", name))
-	return c.Render(422, "recipe-form", &db.Recipe{})
+	return c.Render(422, "recipe-form", &schema.Recipe{})
 }
 
 func HandleGetAllRecipes(c echo.Context) error {
-	recipes, err := db.GetAllRecipes()
+	recipes, err := tables.GetAllRecipes()
 	if err != nil {
 		log.Fatal(err)
 		return c.Render(500, "recipes-list", nil)

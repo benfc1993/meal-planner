@@ -1,77 +1,17 @@
 package main
 
 import (
-	"errors"
+	"embed"
 	"fmt"
-	"html/template"
-	"io"
 	"log"
-	"log/slog"
 	"meal-choices/db"
 	"meal-choices/routes"
+	"meal-choices/templates"
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"sync"
 )
-
-type Templates struct {
-	templates *template.Template
-}
-
-func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-func newTemplate() *Templates {
-	templates, err := findAndParseTemplates("views", nil)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return &Templates{
-		templates: templates,
-	}
-}
-
-func findAndParseTemplates(rootDir string, funcMap template.FuncMap) (*template.Template, error) {
-	cleanRoot := filepath.Clean(rootDir)
-	pfx := len(cleanRoot) + 1
-	root := template.New("")
-
-	err := filepath.Walk(cleanRoot, func(path string, info os.FileInfo, e1 error) error {
-		if !info.IsDir() && strings.HasSuffix(path, ".html") {
-			if e1 != nil {
-				return e1
-			}
-
-			b, e2 := os.ReadFile(path)
-			if e2 != nil {
-				return e2
-			}
-
-			name := path[pfx:]
-			t := root.New(name).Funcs(funcMap)
-			_, e2 = t.Parse(string(b))
-			if e2 != nil {
-				return e2
-			}
-		}
-
-		return nil
-	})
-
-	return root, err
-}
-
-type Data struct {
-	Form *db.Recipe
-}
 
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
@@ -85,43 +25,87 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
+//go:embed pages/*
+//go:embed static/*
+var f embed.FS
+
 func main() {
-	_, err := db.InitDb()
+
+	opts := getOpts()
+
+	templates, err := templates.CreateTemplates(f, "pages")
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("Error parsing templates")
+		log.Fatal(err)
 	}
 
-	// Echo instance
-	e := echo.New()
+	/* api.Handlers() */
+	routes.Handlers(f, templates)
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	wg := new(sync.WaitGroup)
 
-	e.Static("/static", "./static/")
-
-	e.Renderer = newTemplate()
-
-	e.GET("/", routes.HandleHomepage)
-
-	e.GET("/all", func(c echo.Context) error {
-		log.Println("testing")
-		return c.Render(200, "pages/all/index.html", nil)
+	wg.Go(func() {
+		if opts.Https {
+			log.Fatal(http.ListenAndServeTLS(fmt.Sprintf("%v:%v", opts.Host, opts.Port), "", "", nil))
+		} else {
+			log.Fatal(http.ListenAndServe(fmt.Sprintf("%v:%v", opts.Host, opts.Port), nil))
+		}
 	})
-	e.POST("/recipes/generate", routes.HandleRecipesGenerate)
-	e.POST("/recipes/add", routes.HandleRecipeAdd)
-	e.GET("/recipes/all", routes.HandleGetAllRecipes)
-	e.DELETE("/", func(c echo.Context) error { return nil })
 
-	ip := fmt.Sprintf("%s:80", GetOutboundIP().String())
-	log.Println(os.Getenv("ENV"))
-	if os.Getenv("ENV") == "dev" {
-		ip = "127.0.0.1:8080"
+	prefix := "http"
+	if opts.Https {
+		prefix += "s"
 	}
-	// Start server
-	if err := e.Start(ip); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		slog.Error("failed to start server", "error", err)
+	fmt.Printf("Server running %v://%v:%v\n", prefix, opts.Host, opts.Port)
+
+	db.Init()
+
+	wg.Wait()
+}
+
+type Options struct {
+	Port  string
+	Host  string
+	Https bool
+}
+
+func getOpts() *Options {
+	options := &Options{Port: "5000", Host: "localhost", Https: false}
+
+	for i := 0; i < len(os.Args); i++ {
+		arg := os.Args[i]
+
+		if string(arg[0]) == "-" {
+			for {
+				if string(arg[0]) == "-" {
+					arg = arg[1:]
+				} else {
+					break
+				}
+			}
+
+			switch arg {
+			case "h", "help":
+				data, _ := f.ReadFile("static/help.txt")
+				fmt.Print(string(data))
+				os.Exit(0)
+			case "p", "port":
+				options.Port = os.Args[i+1]
+				i++
+			case "u", "host":
+				options.Host = os.Args[i+1]
+				i++
+			case "s", "https":
+				options.Https = true
+			default:
+				log.Printf("Unknown option: %v\n", arg)
+			}
+
+		}
+
 	}
+
+	return options
+
 }
