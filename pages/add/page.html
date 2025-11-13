@@ -1,12 +1,13 @@
 <html>
   {{ template "header" "Meal planner"}}
   <body>
-    {{ template "navigation" "add" }} {{ template "recipe-form-view" .}}
+    {{ template "navigation" "add" }} {{ template "recipe-form-view" .}} {{
+    template "file-upload" .}}
     <script>
       htmx.on("htmx:beforeSwap", (e) => {
         // Allow 422 and 400 responses to swap
         // We treat these as form validation errors
-        if (e.detail.xhr.status === 422 || e.detail.xhr.status === 400) {
+        if (e.detail.xhr.status === 422) {
           e.detail.shouldSwap = true;
           e.detail.isError = false;
         }

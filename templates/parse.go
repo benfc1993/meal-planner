@@ -32,7 +32,7 @@ func Walk(f embed.FS, root *template.Template, path string, prefix int) error {
 			dirPath := path + "/" + entry.Name()
 			Walk(f, root, dirPath, prefix)
 		}
-		if strings.HasSuffix(info.Name(), ".html") || strings.HasSuffix(info.Name(), ".tmpl") {
+		if strings.HasSuffix(info.Name(), ".html") {
 			filePath := path + "/" + info.Name()
 			b, err := f.ReadFile(filePath)
 			if err != nil {

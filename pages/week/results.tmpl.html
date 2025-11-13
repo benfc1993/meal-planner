@@ -1,0 +1,22 @@
+{{ block "results" . }}
+<div>
+	<form hx-post="/recipes/week">
+		<input name="week" value="{{.Week}}" hidden readonly />
+		{{range .Recipes }} {{template "result" .}} {{ end}}
+		<button>Save</button>
+	</form>
+</div>
+{{end}}
+
+<!--single result-->
+
+{{block "result".}}
+<div style="display: flex; gap: 6px" id="gen-result-{{.Id}}">
+	<input name="recipe" value="{{.Id}}" readonly hidden />
+	<p>{{.Id}} || {{ .Name }} | {{ .Book }} - p{{ .Page}}</p>
+	<button type="button">Re-roll</button>
+	<button type="button" hx-delete="/" hx-swap="outerHTML" hx-target="#gen-result-{{.Id}}">
+		Delete
+	</button>
+</div>
+{{ end}}

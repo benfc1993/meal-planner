@@ -1,0 +1,13 @@
+{{ block "file-upload" . }}
+<form
+  hx-post="/recipes/upload"
+  hx-swap="outerHTML"
+  hx-encoding="multipart/form-data"
+>
+  <input name="file" type="file" accept=".csv" />
+  <button>Upload</button>
+  {{if ne . "" }}
+  <p>{{.}}</p>
+  {{end}}
+</form>
+{{ end }}

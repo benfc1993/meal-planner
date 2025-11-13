@@ -31,8 +31,8 @@ func Handlers(f embed.FS, templates *template.Template) {
 	http.HandleFunc("GET /recipes/all", handler(HandleGetAllRecipes))
 
 	http.HandleFunc("POST /recipes/add", handler(HandleRecipeAdd))
+	http.HandleFunc("POST /recipes/upload", handler(HandleCsvUpload))
 	http.HandleFunc("GET /add", func(w http.ResponseWriter, r *http.Request) {
-
 		templates.ExecuteTemplate(w, "/add", schema.NewRecipe())
 	})
 
